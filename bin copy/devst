@@ -1,0 +1,5 @@
+#!/bin/zsh
+cd /Users/fin/Claude-Brain
+tmux new-session -d 'claude'
+tmux split-window -h 'btop'
+tmux -2 attach-session -d
