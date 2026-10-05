@@ -1,18 +1,29 @@
 #!/bin/zsh
 
-d1=~/Desktop/orchbrain/oc1
-d2=~/Desktop/orchbrain/oc2
-d3=~/Desktop/orchbrain/oc3
-d4=~/Desktop/orchbrain/oc4
+# Check if a filepath argument was provided
+if [ $# -eq 0 ]; then
+  echo "Usage: $0 <filepath>"
+  exit 1
+fi
 
-tmux new-session -d -s claude -c $d1
+target_dir="$1"
+
+# Verify the directory actually exists
+if [ ! -d "$target_dir" ]; then
+  echo "Error: Directory '$target_dir' does not exist."
+  exit 1
+fi
+
+# Create the session and panes, all starting in target_dir
+tmux new-session -d -s claude -c "$target_dir"
 p1=$(tmux display-message -p -t claude '#{pane_id}')
-p2=$(tmux split-window -h -t $p1 -c $d2 -P -F '#{pane_id}')
-p3=$(tmux split-window -v -t $p1 -c $d3 -P -F '#{pane_id}')
-p4=$(tmux split-window -v -t $p2 -c $d4 -P -F '#{pane_id}')
+p2=$(tmux split-window -h -t $p1 -c "$target_dir" -P -F '#{pane_id}')
+p3=$(tmux split-window -v -t $p1 -c "$target_dir" -P -F '#{pane_id}')
+p4=$(tmux split-window -v -t $p2 -c "$target_dir" -P -F '#{pane_id}')
 
-for p in $p1 $p2 $p3 $p4; do
-  tmux send-keys -t $p claude C-m
-done
+tmux send-keys -t $p1 'claude --name programmer --agent programmer' C-m
+tmux send-keys -t $p2 'claude --name researcher --agent researcher' C-m
+tmux send-keys -t $p3 'claude --name pm --agent pm' C-m
+tmux send-keys -t $p4 'claude --name designer --agent designer' C-m
 
 tmux attach -t claude
