@@ -15,8 +15,9 @@ if [ ! -d "$target_dir" ]; then
 fi
 
 # Create the session and panes, all starting in target_dir
-tmux new-session -d -s claude -c "$target_dir"
-p1=$(tmux display-message -p -t claude '#{pane_id}')
+# No -s, so tmux assigns a unique numbered session; capture its ID to target it
+session=$(tmux new-session -d -c "$target_dir" -P -F '#{session_id}')
+p1=$(tmux display-message -p -t "$session" '#{pane_id}')
 p2=$(tmux split-window -h -t $p1 -c "$target_dir" -P -F '#{pane_id}')
 p3=$(tmux split-window -v -t $p1 -c "$target_dir" -P -F '#{pane_id}')
 p4=$(tmux split-window -v -t $p2 -c "$target_dir" -P -F '#{pane_id}')
@@ -26,4 +27,4 @@ tmux send-keys -t $p2 'claude --name researcher --agent researcher' C-m
 tmux send-keys -t $p3 'claude --name pm --agent pm' C-m
 tmux send-keys -t $p4 'claude --name designer --agent designer' C-m
 
-tmux attach -t claude
+tmux attach -t "$session"
